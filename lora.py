@@ -170,6 +170,16 @@ class LoRa:
     def set_preamble_length(self, n):
         self._write(REG_PREAMBLE_MSB, (n >> 8) & 0xff)
         self._write(REG_PREAMBLE_LSB, (n >> 0) & 0xff)
+        
+    def set_payload_length(self, n):
+        m = self._read(REG_PAYLOAD_LENGTH)
+        p = MAX_PKT_LENGTH - TX_BASE_ADDR
+        if n + m > p:
+            raise ValueError('Max payload length is ' + str(p))
+        if self._implicit:
+            self._write(REG_PAYLOAD_LENGTH, m+n)
+        else:
+            raise ValueError("Not in implicit mode")
 
     def set_crc(self, crc=False):
         modem_config_2 = self._read(REG_MODEM_CONFIG_2)
